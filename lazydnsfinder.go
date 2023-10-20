@@ -13,6 +13,7 @@ import (
 
 func main() {
 	domain := flag.String("domain", "", "Domain to find subdomains from")
+	noWhois := flag.Bool("nowhois", false, "Just list possible subdomains without performing whois on IPs")
 	flag.Parse()
 	if len(*domain) == 0 {
 		flag.Usage()
@@ -33,7 +34,9 @@ func main() {
 		} else {
 			fmt.Printf("\n%s [%s]\n", element, utilsdns.GetValueFromWhois(domainWhois, "registrar"))
 		}
-
+		if *noWhois {
+			continue
+		}
 		ips, ipsEr := net.LookupIP(element)
 		if ipsEr == nil {
 			for _, ip := range ips {
