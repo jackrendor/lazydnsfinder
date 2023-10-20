@@ -1,6 +1,6 @@
 module github.com/jackrendor/lazydnsfinder
 
-go 1.21.1
+go 1.21
 
 require github.com/likexian/whois v1.15.1
 
