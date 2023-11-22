@@ -6,6 +6,7 @@ import (
 	"net"
 
 	"github.com/jackrendor/lazydnsfinder/api"
+	"github.com/jackrendor/lazydnsfinder/config"
 	"github.com/jackrendor/lazydnsfinder/utilsdns"
 
 	"github.com/likexian/whois"
@@ -14,7 +15,11 @@ import (
 func main() {
 	domain := flag.String("domain", "", "Domain to find subdomains from")
 	noWhois := flag.Bool("nowhois", false, "Just list possible subdomains without performing whois on IPs")
+	maxRecursion := flag.Int("maxrecursion", 1, "Maximum recursion for every API endpoint. So if there's more than 1 page result from API, perform only N calls to the endpoint")
+	shodan := flag.Bool("shodan", false, "Use shodan API (requires API key)")
+	censys := flag.Bool("censys", false, "Use censys API (requires API key)")
 	flag.Parse()
+
 	if len(*domain) == 0 {
 		flag.Usage()
 		return
@@ -23,6 +28,13 @@ func main() {
 	var allDomains []string
 	allDomains = api.CRTSH(*domain)
 	allDomains = append(allDomains, api.HackerTarget(*domain)...)
+	if config.Values.Censys.APIID != "" && config.Values.Censys.APISECRET != "" && *censys {
+		allDomains = append(allDomains, api.CensysHosts(*domain, "", *maxRecursion)...)
+		allDomains = append(allDomains, api.CensysCerts(*domain, "", *maxRecursion)...)
+	}
+	if config.Values.Shodan.APIKEY != "" && *shodan {
+		allDomains = append(allDomains, api.Shodan(*domain, 0, *maxRecursion)...)
+	}
 
 	allDomains = utilsdns.RemoveDuplicateStr(allDomains)
 	for _, element := range allDomains {
