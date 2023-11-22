@@ -22,6 +22,9 @@ type ConfigStruct struct {
 	Shodan struct {
 		APIKEY string `yaml:"APIKEY"`
 	}
+	SecurityTrails struct {
+		APIKEY string `yaml:"APIKEY"`
+	}
 }
 
 func init() {

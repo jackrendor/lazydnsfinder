@@ -295,3 +295,50 @@ func Shodan(domainArg string, next int, maxRecursion int) []string {
 	}
 	return result
 }
+
+func SecurityTrails(domainArg string) []string {
+	var result []string
+	req, reqErr := http.NewRequest("GET", "https://api.securitytrails.com/v1/domain/"+domainArg+"/subdomains", nil)
+	if reqErr != nil {
+		log.Println("[SecurityTrails]", reqErr.Error())
+		return result
+	}
+
+	query := req.URL.Query()
+	query.Set("children_only", "false")
+	query.Set("include_inactive", "true")
+	req.URL.RawQuery = query.Encode()
+
+	req.Header.Set("apikey", config.Values.SecurityTrails.APIKEY)
+
+	fmt.Println("[SecurityTrails] interrogating...")
+	resp, respErr := Client.Do(req)
+	if respErr != nil {
+		log.Println("[SecurityTrails]", respErr.Error())
+		return result
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		log.Println("[SecurityTrails]", resp.Status)
+		return result
+	}
+
+	bodyBytes, readAllErr := io.ReadAll(resp.Body)
+	if readAllErr != nil {
+		log.Println("[SecurityTrails]", respErr.Error())
+		return result
+	}
+
+	parsedJson := gjson.ParseBytes(bodyBytes)
+
+	tmp := make(map[string]bool)
+	for _, elem := range parsedJson.Get("subdomains").Array() {
+		tmp[elem.Str+"."+domainArg] = true
+
+	}
+	// removes duplicates
+	for key := range tmp {
+		result = append(result, key)
+	}
+	return result
+}
