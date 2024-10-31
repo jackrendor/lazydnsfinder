@@ -325,7 +325,7 @@ func SecurityTrails(domainArg string) []string {
 
 	bodyBytes, readAllErr := io.ReadAll(resp.Body)
 	if readAllErr != nil {
-		log.Println("[SecurityTrails]", respErr.Error())
+		log.Println("[SecurityTrails]", readAllErr.Error())
 		return result
 	}
 
