@@ -138,7 +138,7 @@ func CensysCerts(domainArg string, next string, maxRecursion int) []string {
 
 	bodyBytes, readAllErr := io.ReadAll(resp.Body)
 	if readAllErr != nil {
-		log.Println("[Censys Certs]", respErr.Error())
+		log.Println("[Censys Certs]", readAllErr.Error())
 		return result
 	}
 
@@ -210,7 +210,7 @@ func CensysHosts(domainArg string, next string, maxRecursion int) []string {
 
 	bodyBytes, readAllErr := io.ReadAll(resp.Body)
 	if readAllErr != nil {
-		log.Println("[Censys]", respErr.Error())
+		log.Println("[Censys]", readAllErr.Error())
 		return result
 	}
 
@@ -273,7 +273,7 @@ func Shodan(domainArg string, next int, maxRecursion int) []string {
 
 	bodyBytes, readAllErr := io.ReadAll(resp.Body)
 	if readAllErr != nil {
-		log.Println("[Shodan]", respErr.Error())
+		log.Println("[Shodan]", readAllErr.Error())
 		return result
 	}
 
