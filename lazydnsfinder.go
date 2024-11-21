@@ -31,7 +31,6 @@ func main() {
 	allDomains = append(allDomains, api.HackerTarget(*domain)...)
 	if config.Values.Censys.APIID != "" && config.Values.Censys.APISECRET != "" && *censys {
 		allDomains = append(allDomains, api.CensysHosts(*domain, "", *maxRecursion)...)
-		allDomains = append(allDomains, api.CensysCerts(*domain, "", *maxRecursion)...)
 	}
 	if config.Values.Shodan.APIKEY != "" && *shodan {
 		allDomains = append(allDomains, api.Shodan(*domain, 0, *maxRecursion)...)
@@ -56,18 +55,13 @@ func main() {
 		ips, ipsEr := net.LookupIP(element)
 		if ipsEr == nil {
 			for _, ip := range ips {
-				whoisRaw, whoisErr := whois.Whois(ip.String())
-				if whoisErr != nil {
-					fmt.Println(" [No info]", ip.String())
+				ipStr := ip.String()
+				ipData, lookupErr := utilsdns.GetDataFromIP(ipStr)
+				if lookupErr != nil {
+					fmt.Println(" [Error]", ipStr, lookupErr.Error())
 				} else {
-					registrar := utilsdns.GetValueFromWhois(whoisRaw, "org-name")
-					//descr or org-name
-					if registrar == "No info" {
-						registrar = utilsdns.GetValueFromWhois(whoisRaw, "descr")
-					}
-					fmt.Printf(" %s [%s] %s\n", utilsdns.GetValueFromWhois(whoisRaw, "country"), registrar, ip.String())
+					fmt.Printf(" %s [%s] %s\n", ipData.CountryCode, ipData.Connection.Org, ipStr)
 				}
-
 			}
 		}
 	}
