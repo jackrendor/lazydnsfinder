@@ -374,11 +374,12 @@ func THC(domain string) []string {
 			return domains
 		}
 
+		domains = append(domains, Data.Domains...)
+
 		if len(Data.NextPageState) == 0 {
 			break
 		}
-		domains = append(domains, Data.Domains...)
-
+		data.Set("page_state", Data.NextPageState)
 	}
 	return domains
 }
