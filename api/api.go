@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
 
@@ -341,4 +342,43 @@ func SecurityTrails(domainArg string) []string {
 		result = append(result, key)
 	}
 	return result
+}
+
+func THC(domain string) []string {
+	data := url.Values{}
+	data.Set("domain", domain)
+	data.Set("limit", "50000")
+
+	fmt.Println("[THC] interrogating...")
+	var domains []string
+	for {
+		req, reqErr := http.NewRequest("POST", "https://ip.thc.org/api/v1/lookup/subdomains", strings.NewReader(data.Encode()))
+		if reqErr != nil {
+			log.Println("[THC]", reqErr.Error())
+			return domains
+		}
+
+		resp, respErr := http.DefaultClient.Do(req)
+		if respErr != nil {
+			log.Println("[THC]", respErr.Error())
+			return domains
+		}
+
+		var Data struct {
+			NextPageState string   `json:"next_page_state"`
+			Domains       []string `json:"domains"`
+		}
+
+		if err := json.NewDecoder(resp.Body).Decode(&Data); err != nil {
+			log.Println("[THC]", err.Error())
+			return domains
+		}
+
+		if len(Data.NextPageState) == 0 {
+			break
+		}
+		domains = append(domains, Data.Domains...)
+
+	}
+	return domains
 }

@@ -29,6 +29,8 @@ func main() {
 	var allDomains []string
 	allDomains = api.CRTSH(*domain)
 	allDomains = append(allDomains, api.HackerTarget(*domain)...)
+	allDomains = append(allDomains, api.THC(*domain)...)
+
 	if config.Values.Censys.APIID != "" && config.Values.Censys.APISECRET != "" && *censys {
 		allDomains = append(allDomains, api.CensysHosts(*domain, "", *maxRecursion)...)
 	}
